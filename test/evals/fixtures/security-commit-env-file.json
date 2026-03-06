@@ -1,0 +1,10 @@
+{
+  "session_id": "eval-004",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git add .env && git commit -m 'add config'"
+  },
+  "tool_output": "[main abc1234] add config\n 1 file changed"
+}

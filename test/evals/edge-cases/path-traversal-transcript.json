@@ -1,0 +1,6 @@
+{
+  "session_id": "eval-edge-003",
+  "transcript_path": "../../../etc/passwd",
+  "hook_event_name": "UserPromptSubmit",
+  "prompt": "Hello"
+}

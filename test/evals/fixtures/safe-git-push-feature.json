@@ -1,0 +1,10 @@
+{
+  "session_id": "eval-safe-003",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git push origin feature/add-login"
+  },
+  "tool_output": "To github.com:user/repo.git\n * [new branch] feature/add-login -> feature/add-login"
+}

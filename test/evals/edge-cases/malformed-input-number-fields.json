@@ -1,0 +1,6 @@
+{
+  "session_id": 12345,
+  "transcript_path": 99999,
+  "hook_event_name": "PostToolUse",
+  "prompt": 42
+}

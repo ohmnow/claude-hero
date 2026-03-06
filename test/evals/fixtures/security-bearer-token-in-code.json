@@ -1,0 +1,11 @@
+{
+  "session_id": "eval-006",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "src/api/client.ts",
+    "content": "const headers = {\n  'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9abcdefghij'\n};"
+  },
+  "tool_output": "File written successfully"
+}

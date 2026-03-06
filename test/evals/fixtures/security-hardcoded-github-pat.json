@@ -1,0 +1,11 @@
+{
+  "session_id": "eval-002",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Write",
+  "tool_input": {
+    "file_path": "src/config.ts",
+    "content": "export const config = {\n  githubToken: 'ghp_ABCDEFghijklmnopqrstuvwxyz1234567890',\n  repoOwner: 'myorg'\n};"
+  },
+  "tool_output": "File written successfully"
+}

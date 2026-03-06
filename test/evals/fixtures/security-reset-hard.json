@@ -1,0 +1,10 @@
+{
+  "session_id": "eval-005",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git reset --hard HEAD~5"
+  },
+  "tool_output": "HEAD is now at abc1234"
+}

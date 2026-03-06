@@ -1,0 +1,12 @@
+{
+  "session_id": "eval-safe-002",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "src/utils/helpers.ts",
+    "old_string": "function add(a: number, b: number) { return a + b; }",
+    "new_string": "function add(a: number, b: number): number {\n  return a + b;\n}"
+  },
+  "tool_output": "File edited successfully"
+}

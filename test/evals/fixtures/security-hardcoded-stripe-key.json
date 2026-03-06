@@ -1,0 +1,12 @@
+{
+  "session_id": "eval-001",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "src/payments/stripe.ts",
+    "old_string": "const stripeKey = process.env.STRIPE_KEY;",
+    "new_string": "const stripeKey = 'sk-live-4eC39HqLyjWDarjtT1zdp7dc';"
+  },
+  "tool_output": "File edited successfully"
+}

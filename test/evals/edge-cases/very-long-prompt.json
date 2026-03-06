@@ -1,0 +1,6 @@
+{
+  "session_id": "eval-edge-002",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "UserPromptSubmit",
+  "prompt": "PLACEHOLDER_WILL_BE_GENERATED_BY_RUNNER"
+}

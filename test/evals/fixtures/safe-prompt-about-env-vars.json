@@ -1,0 +1,6 @@
+{
+  "session_id": "eval-safe-005",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "UserPromptSubmit",
+  "prompt": "How do I set up environment variables for my API keys?"
+}

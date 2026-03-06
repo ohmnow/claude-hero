@@ -1,0 +1,10 @@
+{
+  "session_id": "eval-safe-001",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git add .env.example && git commit -m 'add env template'"
+  },
+  "tool_output": "[main abc1234] add env template\n 1 file changed"
+}

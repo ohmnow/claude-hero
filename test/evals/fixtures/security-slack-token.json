@@ -1,0 +1,12 @@
+{
+  "session_id": "eval-007",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Edit",
+  "tool_input": {
+    "file_path": "src/notifications/slack.ts",
+    "old_string": "const token = process.env.SLACK_TOKEN;",
+    "new_string": "const token = 'xoxb-FAKE000000-TESTEVAL00000000';"
+  },
+  "tool_output": "File edited successfully"
+}

@@ -1,0 +1,10 @@
+{
+  "session_id": "eval-003",
+  "transcript_path": "/tmp/claude-hero-eval-transcript.jsonl",
+  "hook_event_name": "PostToolUse",
+  "tool_name": "Bash",
+  "tool_input": {
+    "command": "git push --force origin main"
+  },
+  "tool_output": "Everything up-to-date"
+}
