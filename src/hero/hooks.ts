@@ -126,7 +126,7 @@ The user is starting a new project. Your job is to:
 - Clarify any technical requirements or constraints
 - When ready, generate a comprehensive feature_list.json
 
-User's initial request: "${prompt}"
+User's initial request: "${prompt.replace(/["\\`$]/g, (c) => '\\' + c).slice(0, 2000)}"
 `;
 
   return {

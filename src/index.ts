@@ -145,17 +145,54 @@ function showTrainingIntentPrompt(): void {
   });
 }
 
+/**
+ * Validate hook input at runtime to catch malformed/malicious payloads early.
+ */
+function validateHookInput(data: unknown): HookInput {
+  if (typeof data !== 'object' || data === null) {
+    throw new Error('Hook input must be an object');
+  }
+  const obj = data as Record<string, unknown>;
+
+  if (typeof obj.session_id !== 'string') {
+    throw new Error('session_id must be a string');
+  }
+  if (typeof obj.transcript_path !== 'string') {
+    throw new Error('transcript_path must be a string');
+  }
+  const validEvents = ['UserPromptSubmit', 'PostToolUse', 'PreToolUse', 'Stop'];
+  if (!validEvents.includes(obj.hook_event_name as string)) {
+    throw new Error(`Invalid hook_event_name: ${obj.hook_event_name}`);
+  }
+  if (obj.prompt !== undefined && typeof obj.prompt !== 'string') {
+    throw new Error('prompt must be a string');
+  }
+  if (obj.tool_name !== undefined && typeof obj.tool_name !== 'string') {
+    throw new Error('tool_name must be a string');
+  }
+  if (obj.tool_output !== undefined && typeof obj.tool_output !== 'string') {
+    throw new Error('tool_output must be a string');
+  }
+
+  return data as HookInput;
+}
+
 async function main(): Promise<void> {
   try {
     // Log hook invocation to file for verification
     const fs = await import('fs');
-    const logFile = '/tmp/claude-hero.log';
+    const path = await import('path');
+    const logDir = process.env.XDG_RUNTIME_DIR
+      ? path.join(process.env.XDG_RUNTIME_DIR, 'claude-hero')
+      : path.join(process.env.HOME || '/tmp', '.cache', 'claude-hero');
+    try { fs.mkdirSync(logDir, { recursive: true, mode: 0o700 }); } catch { /* exists */ }
+    const logFile = path.join(logDir, 'claude-hero.log');
     const timestamp = new Date().toISOString();
     fs.appendFileSync(logFile, `${timestamp} - Hook invoked\n`);
 
     // Read JSON from stdin
     const inputData = await readStdin();
-    const input: HookInput = JSON.parse(inputData);
+    const input = validateHookInput(JSON.parse(inputData));
 
     // Log the event
     fs.appendFileSync(logFile, `${timestamp} - Event: ${input.hook_event_name}\n`);
@@ -394,7 +431,12 @@ async function main(): Promise<void> {
     // Log to file for post-mortem debugging
     try {
       const fs = await import('fs');
-      const logFile = '/tmp/claude-hero.log';
+      const path = await import('path');
+      const errLogDir = process.env.XDG_RUNTIME_DIR
+        ? path.join(process.env.XDG_RUNTIME_DIR, 'claude-hero')
+        : path.join(process.env.HOME || '/tmp', '.cache', 'claude-hero');
+      try { fs.mkdirSync(errLogDir, { recursive: true, mode: 0o700 }); } catch { /* exists */ }
+      const logFile = path.join(errLogDir, 'claude-hero.log');
       const timestamp = new Date().toISOString();
       fs.appendFileSync(logFile, `${timestamp} - ERROR: ${errorMessage}\n`);
       if (errorStack) {
@@ -410,11 +452,19 @@ async function main(): Promise<void> {
 }
 
 function readStdin(): Promise<string> {
+  const MAX_STDIN_SIZE = 10 * 1024 * 1024; // 10MB
   return new Promise((resolve, reject) => {
     let data = '';
+    let totalBytes = 0;
     process.stdin.setEncoding('utf8');
 
     process.stdin.on('data', (chunk) => {
+      totalBytes += Buffer.byteLength(String(chunk));
+      if (totalBytes > MAX_STDIN_SIZE) {
+        reject(new Error(`Input exceeds maximum size of ${MAX_STDIN_SIZE} bytes`));
+        process.stdin.destroy();
+        return;
+      }
       data += chunk;
     });
 

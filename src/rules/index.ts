@@ -287,7 +287,7 @@ const rules: Rule[] = [
       const secretPatterns = [
         /sk[-_]live[-_]/i,           // Stripe live keys
         /sk[-_]test[-_]/i,           // Stripe test keys
-        /api[-_]?key["']\s*[:=]\s*["'][a-z0-9]{20,}/i,  // Generic API keys
+        /api[-_]?key["']\s*[:=]\s*["'][a-zA-Z0-9_\-]{20,}/i,  // Generic API keys (mixed case)
         /password["']\s*[:=]\s*["'][^"']+["']/i,        // Hardcoded passwords
         /secret["']\s*[:=]\s*["'][^"']+["']/i,          // Hardcoded secrets
         /bearer\s+[a-z0-9]{20,}/i,   // Bearer tokens
@@ -559,8 +559,10 @@ export function evaluateRules(context: AnalysisContext): RuleSuggestion[] {
           example: rule.example,  // Training mode example
         });
       }
-    } catch {
-      // Skip rules that error
+    } catch (error) {
+      if (process.env.CLAUDE_HERO_DEBUG === '1') {
+        console.error(`[Claude Hero] Rule '${rule.id}' evaluation failed:`, error instanceof Error ? error.message : error);
+      }
       continue;
     }
   }

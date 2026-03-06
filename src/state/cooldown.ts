@@ -7,12 +7,26 @@
  * Note: Uses file locking to prevent race conditions between concurrent hook invocations.
  */
 
-import { readFileSync, writeFileSync, existsSync, unlinkSync } from 'fs';
+import { readFileSync, writeFileSync, existsSync, unlinkSync, mkdirSync } from 'fs';
+import { join } from 'path';
 import { getCooldownMinutes } from '../config/loader.js';
 import { classifyFile, FileType, hasCodeFiles } from '../utils/file-classifier.js';
 
-const STATE_FILE = '/tmp/claude-hero-state.json';
-const LOCK_FILE = '/tmp/claude-hero-state.lock';
+function getStateDir(): string {
+  const dir = process.env.XDG_RUNTIME_DIR
+    ? join(process.env.XDG_RUNTIME_DIR, 'claude-hero')
+    : join(process.env.HOME || '/tmp', '.cache', 'claude-hero');
+  try {
+    mkdirSync(dir, { recursive: true, mode: 0o700 });
+  } catch {
+    // Directory may already exist
+  }
+  return dir;
+}
+
+const stateDir = getStateDir();
+const STATE_FILE = join(stateDir, 'state.json');
+const LOCK_FILE = join(stateDir, 'state.lock');
 const LOCK_TIMEOUT_MS = 5000; // Max time to wait for lock
 const LOCK_STALE_MS = 10000; // Consider lock stale after this time
 
@@ -66,12 +80,14 @@ function acquireLock(): boolean {
       writeFileSync(LOCK_FILE, String(Date.now()), { flag: 'wx' });
       return true;
     } catch {
-      // Lock exists, wait and retry
-      // Use a small random delay to reduce contention
-      const delay = 10 + Math.random() * 20;
-      const waitUntil = Date.now() + delay;
-      while (Date.now() < waitUntil) {
-        // Busy wait for short duration
+      // Lock exists, wait and retry with non-blocking sleep
+      const delay = Math.floor(10 + Math.random() * 20);
+      try {
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, delay);
+      } catch {
+        // Fallback for environments without SharedArrayBuffer
+        const waitUntil = Date.now() + delay;
+        while (Date.now() < waitUntil) { /* spin */ }
       }
     }
   }
@@ -125,7 +141,7 @@ function saveState(): void {
   if (!stateCache) return;
 
   try {
-    writeFileSync(STATE_FILE, JSON.stringify(stateCache, null, 2));
+    writeFileSync(STATE_FILE, JSON.stringify(stateCache, null, 2), { mode: 0o600 });
   } catch (error) {
     if (process.env.CLAUDE_HERO_DEBUG === '1') {
       console.error('[Claude Hero] Failed to save state:', error);
@@ -177,16 +193,32 @@ export function recordTrigger(ruleId: string): void {
 }
 
 /**
- * Check cooldown and record trigger in one call
- * Returns true if rule triggered (was not in cooldown)
+ * Check cooldown and record trigger atomically.
+ * Returns true if rule triggered (was not in cooldown).
+ * Acquires lock first to prevent TOCTOU race conditions.
  */
 export function tryTrigger(ruleId: string): boolean {
-  if (!canTrigger(ruleId)) {
-    return false;
+  if (!acquireLock()) {
+    // Can't get lock — allow trigger to avoid blocking the user
+    return true;
   }
-
-  recordTrigger(ruleId);
-  return true;
+  try {
+    const currentState = loadState();
+    const lastTriggered = currentState.lastTriggered[ruleId];
+    if (lastTriggered) {
+      const cooldownMs = getCooldownMinutes(ruleId) * 60 * 1000;
+      if (Date.now() - lastTriggered < cooldownMs) {
+        return false; // Still in cooldown
+      }
+    }
+    // Can trigger — record it
+    currentState.lastTriggered[ruleId] = Date.now();
+    currentState.suggestionsShown++;
+    saveState();
+    return true;
+  } finally {
+    releaseLock();
+  }
 }
 
 /**

@@ -235,6 +235,10 @@ export function loadConfig(forceReload = false): WorkflowPilotConfig {
   // Apply mode preset
   finalConfig = applyModePreset(finalConfig);
 
+  // Security: project-level config can NEVER disable critical security alerts.
+  // A malicious .claude-hero.json in a cloned repo must not silence security warnings.
+  finalConfig.tiers.critical.enabled = true;
+
   // Cache and return
   cachedConfig = finalConfig;
   return finalConfig;

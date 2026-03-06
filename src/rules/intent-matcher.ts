@@ -155,7 +155,7 @@ function normalize(text: string): string {
  */
 function extractGitCommandArgs(command: string): string {
   // Safety: limit input length to prevent regex DoS on extremely long strings
-  const MAX_COMMAND_LENGTH = 10000;
+  const MAX_COMMAND_LENGTH = 2000;
   const safeCommand = command.length > MAX_COMMAND_LENGTH
     ? command.slice(0, MAX_COMMAND_LENGTH)
     : command;
